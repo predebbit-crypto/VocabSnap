@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ocrService } from '../../services/ocrService';
+import { dictionaryService } from '../../services/dictionaryService';
 import './CameraCapture.css';
 
 const CameraCapture = ({ onWordsExtracted, onError }) => {
@@ -176,7 +177,7 @@ const CameraCapture = ({ onWordsExtracted, onError }) => {
     setShowManualInput(true);
   };
 
-  const handleManualWordSubmit = () => {
+  const handleManualWordSubmit = async () => {
     console.log('handleManualWordSubmit 호출됨'); // 디버깅용
     setIsSubmittingManual(true);
     const input = manualWord.trim();
@@ -187,79 +188,109 @@ const CameraCapture = ({ onWordsExtracted, onError }) => {
       return;
     }
 
-    // 쉼표나 줄바꿈으로만 분리 (공백은 단어 내에서 허용)
-    let rawWords = [];
-    
-    // 줄바꿈으로 먼저 분리
-    const lines = input.split(/\r?\n/);
-    
-    for (const line of lines) {
-      if (line.trim()) {
-        // 각 줄을 쉼표로 분리
-        const wordsInLine = line.split(',').map(w => w.trim()).filter(w => w.length > 0);
-        rawWords.push(...wordsInLine);
-      }
-    }
-
-    console.log('파싱된 단어들:', rawWords); // 디버깅용
-    
-    if (rawWords.length === 0) {
-      onError('올바른 단어를 입력해주세요.');
-      return;
-    }
-
-    const validWords = [];
-    const invalidWords = [];
-
-    // 각 단어/구문 검증
-    for (const rawWord of rawWords) {
-      const phrase = rawWord.trim().toLowerCase();
-      
-      // 영어 단어/구문 검증 (2글자 이상, 영어와 공백, 하이픈/아포스트로피만)
-      if (/^[a-zA-Z'\s-]+$/.test(phrase) && phrase.length >= 2) {
-        validWords.push({
-          word: phrase,
-          confidence: 100, // 수동 입력은 100% 신뢰도
-          bbox: null,
-          source: 'manual_input',
-          imageData: null
-        });
-      } else {
-        invalidWords.push(rawWord);
-      }
-    }
-
-    console.log('유효한 단어들:', validWords); // 디버깅용
-    console.log('잘못된 단어들:', invalidWords); // 디버깅용
-
-    if (validWords.length === 0) {
-      onError(`올바른 영어 단어가 없습니다. 2글자 이상의 영어 단어를 입력해주세요.${invalidWords.length > 0 ? ` (잘못된 단어: ${invalidWords.join(', ')})` : ''}`);
-      setIsSubmittingManual(false);
-      return;
-    }
-
-    // 잘못된 단어가 있으면 경고 메시지와 함께 진행
-    if (invalidWords.length > 0) {
-      console.warn('잘못된 단어 무시:', invalidWords);
-    }
-
-    console.log('onWordsExtracted 호출 시도'); // 디버깅용
-
-    // 성공 콜백 호출
     try {
+      // 쉼표나 줄바꿈으로만 분리 (공백은 단어 내에서 허용)
+      let rawWords = [];
+      
+      // 줄바꿈으로 먼저 분리
+      const lines = input.split(/\r?\n/);
+      
+      for (const line of lines) {
+        if (line.trim()) {
+          // 각 줄을 쉼표로 분리
+          const wordsInLine = line.split(',').map(w => w.trim()).filter(w => w.length > 0);
+          rawWords.push(...wordsInLine);
+        }
+      }
+
+      console.log('파싱된 단어들:', rawWords); // 디버깅용
+      
+      if (rawWords.length === 0) {
+        onError('올바른 단어를 입력해주세요.');
+        setIsSubmittingManual(false);
+        return;
+      }
+
+      const validWords = [];
+      const invalidWords = [];
+
+      // 각 단어/구문 검증 및 뜻 찾기
+      for (const rawWord of rawWords) {
+        const phrase = rawWord.trim().toLowerCase();
+        
+        // 영어 단어/구문 검증 (2글자 이상, 영어와 공백, 하이픈/아포스트로피만)
+        if (/^[a-zA-Z'\s-]+$/.test(phrase) && phrase.length >= 2) {
+          // 자동 뜻 찾기 (단일 단어인 경우만)
+          let meaning = '';
+          let phonetic = '';
+          
+          if (!phrase.includes(' ')) { // 단일 단어인 경우
+            try {
+              console.log(`${phrase} 뜻 검색 중...`); // 디버깅용
+              const lookupResult = await dictionaryService.lookupWordCached(phrase);
+              
+              if (lookupResult.success) {
+                meaning = dictionaryService.formatMeaning(lookupResult);
+                phonetic = dictionaryService.formatPhonetic(lookupResult);
+                console.log(`${phrase} 뜻 찾음:`, meaning); // 디버깅용
+              }
+            } catch (error) {
+              console.warn(`${phrase} 뜻 검색 실패:`, error);
+            }
+          }
+
+          validWords.push({
+            word: phrase,
+            meaning: meaning, // 자동으로 찾은 뜻
+            phonetic: phonetic, // 발음 기호
+            confidence: 100, // 수동 입력은 100% 신뢰도
+            bbox: null,
+            source: 'manual_input',
+            imageData: null
+          });
+        } else {
+          invalidWords.push(rawWord);
+        }
+      }
+
+      console.log('유효한 단어들:', validWords); // 디버깅용
+      console.log('잘못된 단어들:', invalidWords); // 디버깅용
+
+      if (validWords.length === 0) {
+        onError(`올바른 영어 단어가 없습니다. 2글자 이상의 영어 단어를 입력해주세요.${invalidWords.length > 0 ? ` (잘못된 단어: ${invalidWords.join(', ')})` : ''}`);
+        setIsSubmittingManual(false);
+        return;
+      }
+
+      // 잘못된 단어가 있으면 경고 메시지와 함께 진행
+      if (invalidWords.length > 0) {
+        console.warn('잘못된 단어 무시:', invalidWords);
+      }
+
+      console.log('onWordsExtracted 호출 시도'); // 디버깅용
+
+      // 성공 콜백 호출
       onWordsExtracted(validWords, null);
       console.log('onWordsExtracted 성공'); // 디버깅용
-    } catch (error) {
-      console.error('onWordsExtracted 에러:', error); // 디버깅용
-      onError('단어 추가 중 오류가 발생했습니다.');
+      
+      // 상태 초기화
+      setManualWord('');
+      setShowManualInput(false);
       setIsSubmittingManual(false);
-      return;
+
+      // 성공 메시지
+      const wordsWithMeaning = validWords.filter(w => w.meaning).length;
+      if (wordsWithMeaning > 0) {
+        setTimeout(() => {
+          onError(`${validWords.length}개 단어 추가됨. ${wordsWithMeaning}개 단어의 뜻을 자동으로 찾았습니다!`);
+        }, 100);
+      }
+
+    } catch (error) {
+      console.error('수동 입력 처리 에러:', error); // 디버깅용
+      onError('단어 처리 중 오류가 발생했습니다.');
+      setIsSubmittingManual(false);
     }
-    
-    // 상태 초기화
-    setManualWord('');
-    setShowManualInput(false);
-    setIsSubmittingManual(false);
 
     // 성공 메시지 (선택사항)
     if (invalidWords.length > 0) {
@@ -492,9 +523,9 @@ const CameraCapture = ({ onWordsExtracted, onError }) => {
                   rows="4"
                 />
                 <div className="input-guidelines">
-                  • 영어 단어나 구문을 입력할 수 있습니다 (예: "weather forecast")<br/>
+                  • 영어 단어나 구문을 입력할 수 있습니다 (예: "apple", "weather forecast")<br/>
                   • 여러 개는 <strong>쉼표(,)</strong> 또는 <strong>줄바꿈</strong>으로 구분하세요<br/>
-                  • 공백은 구문 내에서 사용 가능합니다<br/>
+                  • <strong>단일 단어는 자동으로 뜻을 찾아 저장됩니다!</strong><br/>
                   • Ctrl+Enter 키로 빠르게 추가할 수 있습니다
                 </div>
               </div>

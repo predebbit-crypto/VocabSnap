@@ -23,10 +23,21 @@ export const ttsService = {
         return;
       }
 
+      // 모바일에서 TTS가 작동하지 않을 때를 위한 사용자 상호작용 확인
+      if (!this._userInteracted) {
+        // 사용자 상호작용이 필요한 경우 알림
+        reject(new Error('모바일에서 음성을 재생하려면 화면을 터치해주세요.'));
+        return;
+      }
+
       // 현재 재생 중인 음성 중단
       speechSynthesis.cancel();
 
-      const utterance = new SpeechSynthesisUtterance(text);
+      // iOS Safari 호환성을 위한 약간의 지연
+      const delay = this._isMobile() ? 100 : 0;
+      
+      setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(text);
       
       // 기본 설정
       const defaultOptions = {
@@ -69,9 +80,44 @@ export const ttsService = {
         };
       }
 
-      // 음성 재생 시작
-      speechSynthesis.speak(utterance);
+        // 음성 재생 시작
+        speechSynthesis.speak(utterance);
+      }, delay);
     });
+  },
+
+  // 모바일 디바이스 감지
+  _isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  },
+
+  // 사용자 상호작용 초기화
+  _userInteracted: false,
+  
+  // 사용자 상호작용 등록
+  initUserInteraction() {
+    if (this._userInteracted) return;
+    
+    const enableAudio = () => {
+      this._userInteracted = true;
+      
+      // 모바일에서 TTS 활성화를 위한 빈 음성 재생
+      if (this._isMobile() && this.isSupported()) {
+        const utterance = new SpeechSynthesisUtterance('');
+        utterance.volume = 0;
+        speechSynthesis.speak(utterance);
+      }
+      
+      // 이벤트 리스너 제거
+      document.removeEventListener('click', enableAudio, true);
+      document.removeEventListener('touchstart', enableAudio, true);
+      document.removeEventListener('touchend', enableAudio, true);
+    };
+    
+    // 사용자 상호작용 이벤트 등록
+    document.addEventListener('click', enableAudio, true);
+    document.addEventListener('touchstart', enableAudio, true); 
+    document.addEventListener('touchend', enableAudio, true);
   },
 
   // 단어 목록을 순차적으로 읽기

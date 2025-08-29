@@ -64,8 +64,8 @@ export const storageService = {
       return {
         id: `word_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         word: wordText.toLowerCase().trim(),
-        meaning: '',
-        pronunciation: '',
+        meaning: (typeof wordObj === 'object' ? wordObj.meaning : '') || '',
+        pronunciation: (typeof wordObj === 'object' ? wordObj.phonetic : '') || '',
         date_added: currentDate,
         source_image_data: (typeof wordObj === 'object' ? wordObj.imageData : null) || null,
         learned: false,

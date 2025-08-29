@@ -4,6 +4,7 @@ import WordList from './components/WordList/WordList';
 import Statistics from './components/Statistics/Statistics';
 import Settings from './components/Settings/Settings';
 import { storageService } from './services/storageService';
+import { ttsService } from './services/ttsService';
 import './App.css';
 
 function App() {
@@ -18,6 +19,8 @@ function App() {
 
   useEffect(() => {
     updateTodayStats();
+    // 모바일 TTS 지원을 위한 사용자 상호작용 초기화
+    ttsService.initUserInteraction();
   }, []);
 
   const updateTodayStats = () => {
