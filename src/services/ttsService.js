@@ -23,18 +23,23 @@ export const ttsService = {
         return;
       }
 
-      // 모바일에서 TTS가 작동하지 않을 때를 위한 사용자 상호작용 확인
-      if (!this._userInteracted) {
-        // 사용자 상호작용이 필요한 경우 알림
-        reject(new Error('모바일에서 음성을 재생하려면 화면을 터치해주세요.'));
+      // iOS에서는 TTS 비활성화
+      if (this._isiOS()) {
+        reject(new Error('iOS에서는 음성 기능을 지원하지 않습니다.'));
+        return;
+      }
+
+      // 안드로이드에서만 사용자 상호작용 확인
+      if (this._isMobile() && !this._userInteracted) {
+        reject(new Error('안드로이드에서 음성을 재생하려면 화면을 터치해주세요.'));
         return;
       }
 
       // 현재 재생 중인 음성 중단
       speechSynthesis.cancel();
 
-      // iOS Safari 호환성을 위한 약간의 지연
-      const delay = this._isMobile() ? 100 : 0;
+      // 안드로이드 호환성을 위한 약간의 지연
+      const delay = this._isMobile() ? 200 : 0;
       
       setTimeout(() => {
         const utterance = new SpeechSynthesisUtterance(text);
@@ -86,9 +91,14 @@ export const ttsService = {
     });
   },
 
-  // 모바일 디바이스 감지
+  // 안드로이드 디바이스 감지 (iOS 제외)
   _isMobile() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    return /Android|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  },
+
+  // iOS 디바이스 감지
+  _isiOS() {
+    return /iPhone|iPad|iPod/i.test(navigator.userAgent);
   },
 
   // 사용자 상호작용 초기화
@@ -120,7 +130,7 @@ export const ttsService = {
     document.addEventListener('touchend', enableAudio, true);
   },
 
-  // 단어 목록을 순차적으로 읽기
+  // 단어 목록을 순차적으로 읽기 (개선된 버전)
   async speakWordList(words, options = {}) {
     const defaultOptions = {
       interval: 2000, // 단어 간 간격 (ms)
@@ -134,11 +144,30 @@ export const ttsService = {
     const settings = { ...defaultOptions, ...options };
 
     try {
+      // iOS에서는 전체 재생 비활성화
+      if (this._isiOS()) {
+        throw new Error('iOS에서는 전체 재생 기능을 지원하지 않습니다.');
+      }
+
+      // speechSynthesis 초기화
+      speechSynthesis.cancel();
+      
+      // 약간의 지연 후 시작 (안드로이드 호환성)
+      if (this._isMobile()) {
+        await this.delay(300);
+      }
+
       for (let i = 0; i < words.length; i++) {
         const word = words[i];
         
         if (settings.onWordStart) {
           settings.onWordStart(word, i);
+        }
+
+        // 각 단어 재생 전 speechSynthesis 상태 확인
+        if (speechSynthesis.pending || speechSynthesis.speaking) {
+          speechSynthesis.cancel();
+          await this.delay(100);
         }
 
         await this.speak(word, {

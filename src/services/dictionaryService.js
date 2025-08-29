@@ -1,20 +1,31 @@
-// 무료 영어 사전 API 서비스
+// 한영사전 API 서비스
 export const dictionaryService = {
-  // Free Dictionary API 사용
-  API_BASE_URL: 'https://api.dictionaryapi.dev/api/v2/entries/en',
+  // 1차 API: Free Dictionary API (영영사전)
+  ENGLISH_API_URL: 'https://api.dictionaryapi.dev/api/v2/entries/en',
+  
+  // 2차 API: 구글 번역 (무료 대안)
+  TRANSLATE_API_URL: 'https://api.mymemory.translated.net/get',
 
-  // 단어 뜻 검색
+  // 단어 뜻 검색 (한글 번역 우선)
   async lookupWord(word) {
     try {
       const cleanWord = word.toLowerCase().trim();
-      const response = await fetch(`${this.API_BASE_URL}/${cleanWord}`);
       
-      if (!response.ok) {
-        throw new Error('단어를 찾을 수 없습니다');
+      // 1단계: 한글 번역 시도
+      const koreanMeaning = await this.translateToKorean(cleanWord);
+      
+      // 2단계: 영영사전에서 추가 정보 가져오기
+      let englishData = null;
+      try {
+        const response = await fetch(`${this.ENGLISH_API_URL}/${cleanWord}`);
+        if (response.ok) {
+          englishData = await response.json();
+        }
+      } catch (error) {
+        console.warn(`영영사전 검색 실패: ${cleanWord}`, error);
       }
 
-      const data = await response.json();
-      return this.parseResponse(data);
+      return this.combineResults(cleanWord, koreanMeaning, englishData);
       
     } catch (error) {
       console.warn(`단어 검색 실패: ${word}`, error);
@@ -22,11 +33,79 @@ export const dictionaryService = {
         word,
         meanings: [],
         phonetic: '',
-        pronunciation: '',
         success: false,
         error: error.message
       };
     }
+  },
+
+  // 한글 번역 가져오기
+  async translateToKorean(word) {
+    try {
+      const url = `${this.TRANSLATE_API_URL}?q=${encodeURIComponent(word)}&langpair=en|ko`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error('번역 API 호출 실패');
+      }
+
+      const data = await response.json();
+      
+      if (data.responseData && data.responseData.translatedText) {
+        return data.responseData.translatedText;
+      }
+      
+      return null;
+    } catch (error) {
+      console.warn(`한글 번역 실패: ${word}`, error);
+      return null;
+    }
+  },
+
+  // 결과 조합
+  combineResults(word, koreanMeaning, englishData) {
+    const result = {
+      word,
+      meanings: [],
+      phonetic: '',
+      success: true,
+      source: 'Korean-English Dictionary'
+    };
+
+    // 한글 뜻 추가
+    if (koreanMeaning) {
+      result.meanings.push({
+        partOfSpeech: '',
+        definition: koreanMeaning,
+        example: '',
+        synonyms: []
+      });
+    }
+
+    // 영영사전에서 발음과 추가 정보 가져오기
+    if (englishData && Array.isArray(englishData) && englishData.length > 0) {
+      const entry = englishData[0];
+      
+      // 발음 정보 추가 (필요시)
+      if (entry.phonetic) {
+        result.phonetic = entry.phonetic;
+      }
+
+      // 영어 뜻도 참고용으로 추가 (한글 뜻이 없는 경우)
+      if (!koreanMeaning && entry.meanings && entry.meanings.length > 0) {
+        const firstMeaning = entry.meanings[0];
+        if (firstMeaning.definitions && firstMeaning.definitions.length > 0) {
+          result.meanings.push({
+            partOfSpeech: firstMeaning.partOfSpeech || '',
+            definition: firstMeaning.definitions[0].definition || '',
+            example: firstMeaning.definitions[0].example || '',
+            synonyms: []
+          });
+        }
+      }
+    }
+
+    return result;
   },
 
   // API 응답 파싱

@@ -222,17 +222,15 @@ const CameraCapture = ({ onWordsExtracted, onError }) => {
         if (/^[a-zA-Z'\s-]+$/.test(phrase) && phrase.length >= 2) {
           // 자동 뜻 찾기 (단일 단어인 경우만)
           let meaning = '';
-          let phonetic = '';
           
           if (!phrase.includes(' ')) { // 단일 단어인 경우
             try {
-              console.log(`${phrase} 뜻 검색 중...`); // 디버깅용
+              console.log(`${phrase} 한글 뜻 검색 중...`); // 디버깅용
               const lookupResult = await dictionaryService.lookupWordCached(phrase);
               
               if (lookupResult.success) {
                 meaning = dictionaryService.formatMeaning(lookupResult);
-                phonetic = dictionaryService.formatPhonetic(lookupResult);
-                console.log(`${phrase} 뜻 찾음:`, meaning); // 디버깅용
+                console.log(`${phrase} 한글 뜻 찾음:`, meaning); // 디버깅용
               }
             } catch (error) {
               console.warn(`${phrase} 뜻 검색 실패:`, error);
@@ -241,8 +239,7 @@ const CameraCapture = ({ onWordsExtracted, onError }) => {
 
           validWords.push({
             word: phrase,
-            meaning: meaning, // 자동으로 찾은 뜻
-            phonetic: phonetic, // 발음 기호
+            meaning: meaning, // 자동으로 찾은 한글 뜻
             confidence: 100, // 수동 입력은 100% 신뢰도
             bbox: null,
             source: 'manual_input',
