@@ -1,0 +1,445 @@
+.camera-capture {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* 캡처 인터페이스 */
+.capture-interface {
+  position: relative;
+  background: var(--white);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+/* 카메라 뷰 */
+.camera-view {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: #000;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.camera-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 캡처 오버레이 */
+.capture-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.capture-frame {
+  width: 80%;
+  height: 60%;
+  border: 2px dashed rgba(255, 255, 255, 0.8);
+  border-radius: var(--border-radius-sm);
+  background: rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.btn-capture {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 4px solid var(--primary-color);
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  pointer-events: all;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-capture:hover:not(:disabled) {
+  background: var(--primary-color);
+  transform: scale(1.05);
+}
+
+.btn-capture:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 캡처 옵션 */
+.capture-options {
+  padding: 2rem;
+  text-align: center;
+}
+
+.capture-placeholder {
+  margin-bottom: 2rem;
+}
+
+.placeholder-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+}
+
+.capture-placeholder h3 {
+  color: var(--dark-gray);
+  margin-bottom: 0.5rem;
+}
+
+.capture-placeholder p {
+  color: var(--medium-gray);
+  line-height: 1.6;
+}
+
+.capture-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.capture-btn {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  border-radius: var(--border-radius);
+}
+
+/* 캡처된 이미지 뷰 */
+.captured-image-view {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.image-preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/3;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 처리 중 오버레이 */
+.processing-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+}
+
+.progress-info {
+  text-align: center;
+  padding: 2rem;
+}
+
+.progress-info .loading {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 1rem;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid var(--white);
+}
+
+.progress-info p {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+/* 프로그레스 바 */
+.progress-bar {
+  width: 200px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--primary-color);
+  transition: width 0.3s ease;
+  border-radius: 3px;
+}
+
+/* 이미지 액션 */
+.image-actions {
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+  .camera-capture {
+    margin: 0 -1rem;
+  }
+
+  .capture-options {
+    padding: 1.5rem 1rem;
+  }
+
+  .placeholder-icon {
+    font-size: 3rem;
+  }
+
+  .capture-buttons {
+    max-width: none;
+  }
+
+  .btn-capture {
+    width: 70px;
+    height: 70px;
+    font-size: 1.8rem;
+  }
+
+  .progress-info {
+    padding: 1.5rem;
+  }
+
+  .progress-bar {
+    width: 150px;
+  }
+}
+
+/* 디버깅 컨트롤 */
+.debug-controls {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.debug-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.debug-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.debug-label {
+  color: var(--medium-gray);
+  font-weight: 500;
+}
+
+.debug-description {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--medium-gray);
+  font-style: italic;
+}
+
+/* 디버깅 정보 */
+.debug-info {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: var(--border-radius-sm);
+  border-left: 4px solid var(--warning-color);
+  font-size: 0.9rem;
+}
+
+.debug-info h4 {
+  margin: 0 0 1rem 0;
+  color: var(--dark-gray);
+  font-size: 1rem;
+}
+
+.debug-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.debug-item {
+  padding: 0.75rem;
+  background: var(--white);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid #e9ecef;
+}
+
+.debug-item strong {
+  color: var(--dark-gray);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.debug-text {
+  background: #f1f3f4;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.debug-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.debug-result-item {
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border-left: 3px solid var(--primary-color);
+}
+
+.debug-result-item > div {
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.debug-result-item > div:last-child {
+  margin-bottom: 0;
+}
+
+.debug-steps {
+  margin: 0.5rem 0 0 1rem;
+  padding: 0;
+}
+
+.debug-steps li {
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--medium-gray);
+}
+
+.debug-error {
+  color: var(--danger-color);
+  background: rgba(231, 76, 60, 0.1);
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+.debug-error pre {
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.debug-info details {
+  margin-top: 0.5rem;
+}
+
+.debug-info summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary-color);
+  padding: 0.25rem 0;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.debug-info summary:hover {
+  background-color: rgba(52, 152, 219, 0.1);
+}
+
+/* 수동 입력 모달 */
+.manual-input-modal {
+  max-width: 400px;
+}
+
+.manual-input-form {
+  padding: 1rem 0;
+}
+
+.manual-word-input {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  border: 2px solid #e9ecef;
+  border-radius: var(--border-radius);
+  outline: none;
+  transition: border-color 0.2s ease;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.manual-word-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.input-guidelines {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: var(--light-gray);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: var(--medium-gray);
+}
+
+/* 모바일에서 수동 입력 모달 최적화 */
+@media (max-width: 768px) {
+  .manual-input-modal {
+    max-width: 95vw;
+    margin: 0 auto;
+  }
+
+  .manual-word-input {
+    font-size: 16px; /* iOS에서 줌 방지 */
+    min-height: 60px;
+  }
+
+  .input-guidelines {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+}
+
+/* 가로 모드 (랜드스케이프) */
+@media (orientation: landscape) and (max-height: 600px) {
+  .camera-view {
+    aspect-ratio: 16/9;
+  }
+
+  .capture-frame {
+    height: 50%;
+  }
+
+  .btn-capture {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+}

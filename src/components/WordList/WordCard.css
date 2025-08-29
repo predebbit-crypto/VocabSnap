@@ -1,0 +1,275 @@
+.word-card {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+  border-left: 4px solid var(--primary-color);
+}
+
+.word-card.learned {
+  border-left-color: var(--success-color);
+  background: #f8fff9;
+}
+
+.word-card.has-errors {
+  border-left-color: var(--danger-color);
+}
+
+.word-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* 단어 헤더 */
+.word-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.word-main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.word-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--dark-gray);
+  margin: 0;
+  word-break: break-word;
+}
+
+.btn-play {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--primary-color);
+  color: var(--white);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-play:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: scale(1.1);
+}
+
+.btn-play:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-play.playing {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* 단어 상태 */
+.word-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-learned {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-learned:hover {
+  transform: scale(1.2);
+}
+
+.btn-learned.active {
+  background: var(--success-color);
+  color: var(--white);
+}
+
+.wrong-count {
+  background: var(--danger-color);
+  color: var(--white);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* 단어 본문 */
+.word-body {
+  margin-bottom: 1rem;
+}
+
+.word-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pronunciation {
+  display: flex;
+  align-items: center;
+}
+
+.pronunciation-text {
+  font-family: 'Courier New', monospace;
+  font-size: 1.1rem;
+  color: var(--medium-gray);
+  background: var(--light-gray);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+}
+
+.meaning {
+  background: var(--light-gray);
+  padding: 1rem;
+  border-radius: var(--border-radius-sm);
+  border-left: 3px solid var(--primary-color);
+}
+
+.meaning p {
+  margin: 0;
+  color: var(--dark-gray);
+  line-height: 1.6;
+}
+
+.no-meaning {
+  padding: 1rem;
+  text-align: center;
+  background: #f8f9fa;
+  border-radius: var(--border-radius-sm);
+  border: 2px dashed #dee2e6;
+}
+
+/* 편집 모드 */
+.word-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+/* 단어 액션 */
+.word-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  min-height: 36px;
+}
+
+/* 단어 푸터 */
+.word-footer {
+  border-top: 1px solid #e9ecef;
+  padding-top: 0.75rem;
+  margin-top: 1rem;
+}
+
+.word-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: var(--medium-gray);
+}
+
+.added-date, .confidence {
+  padding: 0.25rem 0.5rem;
+  background: var(--light-gray);
+  border-radius: var(--border-radius-sm);
+}
+
+/* 모바일 최적화 */
+@media (max-width: 768px) {
+  .word-card {
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .word-text {
+    font-size: 1.3rem;
+  }
+
+  .btn-play {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .word-actions {
+    justify-content: center;
+    margin-top: 0.75rem;
+  }
+
+  .btn-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .word-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .edit-actions {
+    justify-content: center;
+  }
+}
+
+/* 작은 화면에서의 추가 최적화 */
+@media (max-width: 480px) {
+  .word-header {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .word-status {
+    justify-content: flex-end;
+    width: 100%;
+  }
+
+  .word-actions {
+    gap: 0.25rem;
+  }
+
+  .btn-sm {
+    flex: 1;
+    min-width: 0;
+    padding: 0.5rem 0.25rem;
+    font-size: 0.8rem;
+  }
+}
