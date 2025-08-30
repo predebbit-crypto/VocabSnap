@@ -95,24 +95,22 @@ const WordList = () => {
   };
 
   const playAllWords = async () => {
-    if (filteredWords.length === 0) return;
+    console.log('playAllWords 함수 호출됨');
     
-    setIsPlayingAll(true);
-    setCurrentPlayingIndex(-1);
+    if (filteredWords.length === 0) {
+      console.log('재생할 단어가 없습니다.');
+      alert('재생할 단어가 없습니다.');
+      return;
+    }
+    
     console.log('전체 재생 시작, 단어 수:', filteredWords.length);
+    setIsPlayingAll(true);
     
     try {
       for (let i = 0; i < filteredWords.length; i++) {
-        // 중단 요청 확인
-        if (!isPlayingAll) {
-          console.log('전체 재생이 중단되었습니다.');
-          break;
-        }
-
         const word = filteredWords[i];
-        console.log(`${i + 1}/${filteredWords.length}: ${word.word} 재생 시작`);
+        console.log(`${i + 1}/${filteredWords.length}: ${word.word} 재생`);
         
-        // 현재 재생 중인 단어 표시
         setCurrentPlayingIndex(i);
 
         // 첫 번째 재생
@@ -122,15 +120,9 @@ const WordList = () => {
           rate: 0.9
         });
 
-        // 중단 확인
-        if (!isPlayingAll) break;
-
         // 5초 대기
-        console.log('5초 대기 중...');
+        console.log('5초 대기...');
         await new Promise(resolve => setTimeout(resolve, 5000));
-
-        // 중단 확인
-        if (!isPlayingAll) break;
 
         // 두 번째 재생
         console.log(`두 번째 재생: ${word.word}`);
@@ -139,12 +131,9 @@ const WordList = () => {
           rate: 0.9
         });
 
-        // 중단 확인
-        if (!isPlayingAll) break;
-
-        // 마지막 단어가 아닌 경우 4초 대기
+        // 다음 단어로 넘어가기 전 4초 대기 (마지막 단어가 아닌 경우)
         if (i < filteredWords.length - 1) {
-          console.log('4초 대기 중...');
+          console.log('4초 대기...');
           await new Promise(resolve => setTimeout(resolve, 4000));
         }
       }
@@ -152,6 +141,7 @@ const WordList = () => {
       console.log('전체 재생 완료');
     } catch (error) {
       console.error('전체 재생 실패:', error);
+      alert('전체 재생 중 오류가 발생했습니다: ' + error.message);
     } finally {
       setIsPlayingAll(false);
       setCurrentPlayingIndex(-1);
@@ -242,9 +232,13 @@ const WordList = () => {
               {!isPlayingAll ? (
                 <button
                   className="btn btn-primary btn-sm"
-                  onClick={playAllWords}
+                  onClick={(e) => {
+                    console.log('전체 재생 버튼 클릭됨', e);
+                    console.log('filteredWords:', filteredWords);
+                    playAllWords();
+                  }}
                 >
-                  🔊 전체 재생
+                  🔊 전체 재생 ({filteredWords.length})
                 </button>
               ) : (
                 <button
