@@ -98,26 +98,39 @@ const WordList = () => {
     if (filteredWords.length === 0) return;
     
     setIsPlayingAll(true);
+    console.log('전체 재생 시작, 단어 수:', filteredWords.length);
     
     try {
       const wordsToPlay = filteredWords.map(word => word.word);
       
-      await ttsService.speakWordList(wordsToPlay, {
-        interval: 2000,
+      const result = await ttsService.speakWordList(wordsToPlay, {
+        interval: 1000, // 단어 간 간격을 1초로 단축
         language: 'en-US',
         rate: 0.9,
         onWordStart: (word, index) => {
+          console.log(`단어 재생 시작: ${word} (${index + 1}/${wordsToPlay.length})`);
           setCurrentPlayingIndex(index);
         },
         onWordEnd: (word, index) => {
+          console.log(`단어 재생 완료: ${word}`);
+          // 단어 재생 완료 후 잠시 표시 유지
+        },
+        onComplete: () => {
+          console.log('전체 재생 완료');
           setCurrentPlayingIndex(-1);
+          setIsPlayingAll(false);
         }
       });
+      
+      console.log('재생 결과:', result);
     } catch (error) {
       console.error('전체 재생 실패:', error);
     } finally {
-      setIsPlayingAll(false);
-      setCurrentPlayingIndex(-1);
+      // onComplete에서 처리하므로 여기서는 중단된 경우만 처리
+      if (isPlayingAll) {
+        setIsPlayingAll(false);
+        setCurrentPlayingIndex(-1);
+      }
     }
   };
 
