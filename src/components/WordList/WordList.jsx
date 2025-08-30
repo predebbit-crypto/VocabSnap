@@ -98,43 +98,69 @@ const WordList = () => {
     if (filteredWords.length === 0) return;
     
     setIsPlayingAll(true);
+    setCurrentPlayingIndex(-1);
     console.log('전체 재생 시작, 단어 수:', filteredWords.length);
     
     try {
-      const wordsToPlay = filteredWords.map(word => word.word);
-      
-      const result = await ttsService.speakWordList(wordsToPlay, {
-        interval: 1000, // 단어 간 간격을 1초로 단축
-        language: 'en-US',
-        rate: 0.9,
-        onWordStart: (word, index) => {
-          console.log(`단어 재생 시작: ${word} (${index + 1}/${wordsToPlay.length})`);
-          setCurrentPlayingIndex(index);
-        },
-        onWordEnd: (word, index) => {
-          console.log(`단어 재생 완료: ${word}`);
-          // 단어 재생 완료 후 잠시 표시 유지
-        },
-        onComplete: () => {
-          console.log('전체 재생 완료');
-          setCurrentPlayingIndex(-1);
-          setIsPlayingAll(false);
+      for (let i = 0; i < filteredWords.length; i++) {
+        // 중단 요청 확인
+        if (!isPlayingAll) {
+          console.log('전체 재생이 중단되었습니다.');
+          break;
         }
-      });
-      
-      console.log('재생 결과:', result);
+
+        const word = filteredWords[i];
+        console.log(`${i + 1}/${filteredWords.length}: ${word.word} 재생 시작`);
+        
+        // 현재 재생 중인 단어 표시
+        setCurrentPlayingIndex(i);
+
+        // 첫 번째 재생
+        console.log(`첫 번째 재생: ${word.word}`);
+        await ttsService.speak(word.word, {
+          language: 'en-US',
+          rate: 0.9
+        });
+
+        // 중단 확인
+        if (!isPlayingAll) break;
+
+        // 5초 대기
+        console.log('5초 대기 중...');
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        // 중단 확인
+        if (!isPlayingAll) break;
+
+        // 두 번째 재생
+        console.log(`두 번째 재생: ${word.word}`);
+        await ttsService.speak(word.word, {
+          language: 'en-US',
+          rate: 0.9
+        });
+
+        // 중단 확인
+        if (!isPlayingAll) break;
+
+        // 마지막 단어가 아닌 경우 4초 대기
+        if (i < filteredWords.length - 1) {
+          console.log('4초 대기 중...');
+          await new Promise(resolve => setTimeout(resolve, 4000));
+        }
+      }
+
+      console.log('전체 재생 완료');
     } catch (error) {
       console.error('전체 재생 실패:', error);
     } finally {
-      // onComplete에서 처리하므로 여기서는 중단된 경우만 처리
-      if (isPlayingAll) {
-        setIsPlayingAll(false);
-        setCurrentPlayingIndex(-1);
-      }
+      setIsPlayingAll(false);
+      setCurrentPlayingIndex(-1);
+      console.log('전체 재생 종료');
     }
   };
 
   const stopPlayAll = () => {
+    console.log('전체 재생 정지 요청');
     ttsService.stop();
     setIsPlayingAll(false);
     setCurrentPlayingIndex(-1);
