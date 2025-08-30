@@ -65,7 +65,7 @@ const WordCard = ({ word, onUpdate, onDelete }) => {
   };
 
   return (
-    <div className={`word-card ${word.learned ? 'learned' : ''} ${word.wrong_attempts > 0 ? 'has-errors' : ''}`}>
+    <div className={`word-card compact ${word.learned ? 'learned' : ''} ${word.wrong_attempts > 0 ? 'has-errors' : ''}`}>
       <div className="word-header">
         <div className="word-main">
           <h3 className="word-text">{word.word}</h3>
@@ -79,119 +79,40 @@ const WordCard = ({ word, onUpdate, onDelete }) => {
           </button>
         </div>
         
-        <div className="word-status">
+        <div className="word-actions-compact">
           <button
-            className={`btn-learned ${word.learned ? 'active' : ''}`}
+            className={`btn-learned-compact ${word.learned ? 'active' : ''}`}
             onClick={handleLearnedToggle}
             title={word.learned ? '학습 완료' : '학습 중'}
           >
             {word.learned ? '✅' : '⭕'}
           </button>
           
-          {word.wrong_attempts > 0 && (
-            <span className="wrong-count" title={`${word.wrong_attempts}번 틀림`}>
-              ❌{word.wrong_attempts}
-            </span>
+          {!word.learned && (
+            <button 
+              className="btn-wrong-compact"
+              onClick={handleWrongAttempt}
+              title="틀렸음 표시"
+            >
+              ❌
+            </button>
           )}
+          
+          <button 
+            className="btn-delete-compact"
+            onClick={() => onDelete(word.id)}
+            title="단어 삭제"
+          >
+            🗑️
+          </button>
         </div>
       </div>
 
-      <div className="word-body">
-        {isEditing ? (
-          <div className="word-edit">
-            <div className="form-group">
-              <label className="form-label">발음기호</label>
-              <input
-                type="text"
-                className="form-input"
-                placeholder="예: /ˈeksəmpəl/"
-                value={editData.pronunciation}
-                onChange={(e) => setEditData({
-                  ...editData,
-                  pronunciation: e.target.value
-                })}
-              />
-            </div>
-            
-            <div className="form-group">
-              <label className="form-label">뜻</label>
-              <textarea
-                className="form-input"
-                placeholder="단어의 뜻을 입력하세요"
-                rows="3"
-                value={editData.meaning}
-                onChange={(e) => setEditData({
-                  ...editData,
-                  meaning: e.target.value
-                })}
-              />
-            </div>
-
-            <div className="edit-actions">
-              <button className="btn btn-success" onClick={handleSave}>
-                저장
-              </button>
-              <button className="btn btn-outline" onClick={handleCancel}>
-                취소
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="word-info">
-            {word.pronunciation && (
-              <div className="pronunciation">
-                <span className="pronunciation-text">{word.pronunciation}</span>
-              </div>
-            )}
-            
-            {word.meaning ? (
-              <div className="meaning">
-                <p>{word.meaning}</p>
-              </div>
-            ) : (
-              <div className="no-meaning">
-                <p className="text-muted">뜻이 입력되지 않았습니다</p>
-              </div>
-            )}
-
-            <div className="word-actions">
-              <button 
-                className="btn btn-outline btn-sm"
-                onClick={() => setIsEditing(true)}
-              >
-                편집
-              </button>
-              
-              {!word.learned && (
-                <button 
-                  className="btn btn-danger btn-sm"
-                  onClick={handleWrongAttempt}
-                  title="틀렸음 표시"
-                >
-                  틀림
-                </button>
-              )}
-              
-              <button 
-                className="btn btn-danger btn-sm"
-                onClick={() => onDelete(word.id)}
-                title="단어 삭제"
-              >
-                삭제
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="word-footer">
-        <div className="word-meta">
-          <span className="added-date">추가일: {formatDate(word.date_added)}</span>
-          {word.confidence && (
-            <span className="confidence">정확도: {Math.round(word.confidence)}%</span>
-          )}
+      {word.wrong_attempts > 0 && (
+        <div className="wrong-indicator">
+          ❌ {word.wrong_attempts}번 틀림
         </div>
-      </div>
+      )}
     </div>
   );
 };

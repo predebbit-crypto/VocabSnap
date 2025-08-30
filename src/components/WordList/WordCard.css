@@ -8,6 +8,26 @@
   border-left: 4px solid var(--primary-color);
 }
 
+/* Compact layout for word cards */
+.word-card.compact {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.word-card.compact .word-header {
+  margin-bottom: 0.5rem;
+}
+
+.word-card.compact .word-text {
+  font-size: 1.2rem;
+}
+
+.word-card.compact .btn-play {
+  width: 32px;
+  height: 32px;
+  font-size: 1rem;
+}
+
 .word-card.learned {
   border-left-color: var(--success-color);
   background: #f8fff9;
@@ -86,6 +106,65 @@
   align-items: center;
   gap: 0.5rem;
   flex-shrink: 0;
+}
+
+/* Compact actions */
+.word-actions-compact {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.btn-learned-compact {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-learned-compact:hover {
+  transform: scale(1.1);
+}
+
+.btn-learned-compact.active {
+  background: var(--success-color);
+  color: var(--white);
+}
+
+.btn-wrong-compact, .btn-delete-compact {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-wrong-compact:hover {
+  background: var(--danger-color);
+  color: var(--white);
+}
+
+.btn-delete-compact:hover {
+  background: var(--danger-color);
+  color: var(--white);
+}
+
+.wrong-indicator {
+  font-size: 0.8rem;
+  color: var(--danger-color);
+  font-weight: 600;
+  padding: 0.25rem 0;
 }
 
 .btn-learned {
@@ -218,14 +297,29 @@
     margin-bottom: 0.75rem;
   }
 
+  .word-card.compact {
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
   .word-text {
     font-size: 1.3rem;
+  }
+
+  .word-card.compact .word-text {
+    font-size: 1.1rem;
   }
 
   .btn-play {
     width: 36px;
     height: 36px;
     font-size: 1rem;
+  }
+
+  .word-card.compact .btn-play {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
   }
 
   .word-actions {
@@ -247,6 +341,12 @@
 
   .edit-actions {
     justify-content: center;
+  }
+
+  .btn-learned-compact, .btn-wrong-compact, .btn-delete-compact {
+    width: 24px;
+    height: 24px;
+    font-size: 0.9rem;
   }
 }
 

@@ -148,6 +148,9 @@ export const ttsService = {
     console.log('TTS: 사용자 상호작용 이벤트 리스너 등록됨');
   },
 
+  // 중단 플래그 추가
+  _isStopRequested: false,
+
   // 단어 목록을 순차적으로 읽기 (개선된 버전)
   async speakWordList(words, options = {}) {
     const defaultOptions = {
@@ -162,6 +165,9 @@ export const ttsService = {
     const settings = { ...defaultOptions, ...options };
 
     try {
+      // 중단 플래그 초기화
+      this._isStopRequested = false;
+
       // iOS에서는 전체 재생 비활성화
       if (this._isiOS()) {
         throw new Error('iOS에서는 전체 재생 기능을 지원하지 않습니다.');
@@ -176,6 +182,12 @@ export const ttsService = {
       }
 
       for (let i = 0; i < words.length; i++) {
+        // 중단 요청 확인
+        if (this._isStopRequested) {
+          console.log('TTS: 전체 재생이 중단되었습니다.');
+          break;
+        }
+
         const word = words[i];
         
         if (settings.onWordStart) {
@@ -186,6 +198,12 @@ export const ttsService = {
         if (speechSynthesis.pending || speechSynthesis.speaking) {
           speechSynthesis.cancel();
           await this.delay(100);
+        }
+
+        // 중단 요청 재확인
+        if (this._isStopRequested) {
+          console.log('TTS: 전체 재생이 중단되었습니다.');
+          break;
         }
 
         await this.speak(word, {
@@ -200,25 +218,29 @@ export const ttsService = {
           settings.onWordEnd(word, i);
         }
 
-        // 마지막 단어가 아닌 경우 간격 대기
-        if (i < words.length - 1) {
+        // 마지막 단어가 아닌 경우 간격 대기 (중단 확인 포함)
+        if (i < words.length - 1 && !this._isStopRequested) {
           await this.delay(settings.interval);
         }
       }
 
-      if (settings.onComplete) {
+      if (settings.onComplete && !this._isStopRequested) {
         settings.onComplete();
       }
 
-      return { success: true };
+      return { success: true, stopped: this._isStopRequested };
     } catch (error) {
       console.error('단어 목록 읽기 실패:', error);
       return { success: false, error: error.message };
+    } finally {
+      this._isStopRequested = false;
     }
   },
 
   // 재생 중단
   stop() {
+    console.log('TTS: stop 호출됨');
+    this._isStopRequested = true;
     if (this.isSupported()) {
       speechSynthesis.cancel();
     }
