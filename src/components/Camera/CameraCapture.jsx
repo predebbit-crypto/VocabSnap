@@ -331,13 +331,14 @@ const CameraCapture = ({ onWordsExtracted, onError }) => {
             // 카메라 시작 또는 파일 업로드
             <div className="capture-options">
               <div className="capture-placeholder">
-                <div className="placeholder-icon">📸</div>
-                <h3>영어 단어 사진 찍기</h3>
-                <p>카메라로 영어가 적힌 텍스트를 촬영하거나<br />갤러리에서 이미지를 선택하세요</p>
+                <div className="placeholder-icon">⌨️</div>
+                <h3>영어 단어 학습하기</h3>
+                <p>학습하고 싶은 영어 단어를<br />키보드로 직접 입력하세요</p>
               </div>
 
               <div className="capture-buttons">
-                {hasCamera && (
+                {/* OCR 기능 임시 숨김 */}
+                {false && hasCamera && (
                   <button 
                     className="btn btn-primary capture-btn"
                     onClick={startCamera}
@@ -347,20 +348,22 @@ const CameraCapture = ({ onWordsExtracted, onError }) => {
                   </button>
                 )}
                 
-                <button 
-                  className="btn btn-outline capture-btn"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isProcessing}
-                >
-                  🖼️ 갤러리에서 선택
-                </button>
+                {false && (
+                  <button 
+                    className="btn btn-outline capture-btn"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isProcessing}
+                  >
+                    🖼️ 갤러리에서 선택
+                  </button>
+                )}
                 
                 <button 
-                  className="btn btn-secondary capture-btn"
+                  className="btn btn-primary capture-btn"
                   onClick={handleManualInput}
                   disabled={isProcessing}
                 >
-                  ⌨️ 직접 입력
+                  ⌨️ 단어 입력하기
                 </button>
               </div>
 

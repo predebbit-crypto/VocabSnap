@@ -18,20 +18,27 @@ export const ttsService = {
   // 음성으로 단어 읽기
   speak(text, options = {}) {
     return new Promise((resolve, reject) => {
+      console.log('TTS: speak 호출됨', { text, options });
+      
       if (!this.isSupported()) {
+        console.error('TTS: 브라우저가 TTS를 지원하지 않음');
         reject(new Error('TTS가 지원되지 않는 브라우저입니다.'));
         return;
       }
 
       // iOS에서는 TTS 비활성화
       if (this._isiOS()) {
+        console.error('TTS: iOS에서 TTS 비활성화됨');
         reject(new Error('iOS에서는 음성 기능을 지원하지 않습니다.'));
         return;
       }
 
       // 안드로이드에서만 사용자 상호작용 확인
       if (this._isMobile() && !this._userInteracted) {
-        reject(new Error('안드로이드에서 음성을 재생하려면 화면을 터치해주세요.'));
+        console.warn('TTS: 사용자 상호작용이 필요함');
+        // 사용자 상호작용 초기화 다시 시도
+        this.initUserInteraction();
+        reject(new Error('음성을 재생하려면 화면을 터치해주세요.'));
         return;
       }
 
@@ -86,6 +93,7 @@ export const ttsService = {
       }
 
         // 음성 재생 시작
+        console.log('TTS: 음성 재생 시작', text);
         speechSynthesis.speak(utterance);
       }, delay);
     });
@@ -109,25 +117,35 @@ export const ttsService = {
     if (this._userInteracted) return;
     
     const enableAudio = () => {
+      console.log('TTS: 사용자 상호작용 감지됨');
       this._userInteracted = true;
       
       // 모바일에서 TTS 활성화를 위한 빈 음성 재생
       if (this._isMobile() && this.isSupported()) {
-        const utterance = new SpeechSynthesisUtterance('');
-        utterance.volume = 0;
-        speechSynthesis.speak(utterance);
+        try {
+          const utterance = new SpeechSynthesisUtterance('');
+          utterance.volume = 0;
+          speechSynthesis.speak(utterance);
+          console.log('TTS: 모바일 TTS 활성화 완료');
+        } catch (error) {
+          console.error('TTS: 모바일 TTS 활성화 실패:', error);
+        }
       }
       
       // 이벤트 리스너 제거
       document.removeEventListener('click', enableAudio, true);
       document.removeEventListener('touchstart', enableAudio, true);
       document.removeEventListener('touchend', enableAudio, true);
+      document.removeEventListener('keydown', enableAudio, true);
+      console.log('TTS: 사용자 상호작용 이벤트 리스너 제거됨');
     };
     
-    // 사용자 상호작용 이벤트 등록
+    // 사용자 상호작용 이벤트 등록 (더 많은 이벤트 추가)
     document.addEventListener('click', enableAudio, true);
     document.addEventListener('touchstart', enableAudio, true); 
     document.addEventListener('touchend', enableAudio, true);
+    document.addEventListener('keydown', enableAudio, true);
+    console.log('TTS: 사용자 상호작용 이벤트 리스너 등록됨');
   },
 
   // 단어 목록을 순차적으로 읽기 (개선된 버전)

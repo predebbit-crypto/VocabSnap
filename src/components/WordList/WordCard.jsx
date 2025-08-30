@@ -45,6 +45,8 @@ const WordCard = ({ word, onUpdate, onDelete }) => {
       });
     } catch (error) {
       console.error('발음 재생 실패:', error);
+      // 사용자에게 에러 표시
+      alert('음성 재생에 실패했습니다: ' + error.message);
     } finally {
       setIsPlaying(false);
     }
